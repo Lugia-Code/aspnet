@@ -1,0 +1,18 @@
+using TrackingCodeApi.models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace TrackingCodeApi.repos.tag
+{
+    public interface ITagRepository
+    {
+        Task<IEnumerable<Tag>> GetPagedAsync(int page, int pageSize);
+        Task<int> CountAsync();
+        Task<Tag?> GetByCodigoAsync(int codigo);
+        Task<Tag?> GetByIdAsync(int id);
+        Task AddAsync(Tag tag);
+        Task UpdateAsync(Tag tag);
+        Task DeleteAsync(Tag tag);
+        Task SaveAsync();
+    }
+}
