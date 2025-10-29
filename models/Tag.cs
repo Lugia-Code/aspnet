@@ -7,9 +7,7 @@ namespace TrackingCodeApi.models;
 [Table("tag")]
 public class Tag
 {
-    [Key]
-    [Column("codigo_tag")]
-    public int CodigoTag { get; set; }
+    [Key] [Column("codigo_tag")] public required int CodigoTag { get; set; } = 0;
 
     [Required] 
     [Column("status")] public string Status { get; set; } = "inativo";

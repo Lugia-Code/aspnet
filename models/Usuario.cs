@@ -7,25 +7,19 @@ namespace TrackingCodeApi.models;
 public class Usuario
 {
     [Key]
-    [Column("id_funcionario")]
     public int IdFuncionario { get; set; }
-    
+
     [Required]
-    [Column("nome")]
-    public string Nome { get; set; }
-    
+    public string Nome { get; set; } = string.Empty;   // inicialização remove o warning
+
     [Required]
-    [Column("email")]
-    public string Email { get; set; }
-    
+    public string Email { get; set; } = string.Empty;
+
     [Required]
-    [Column("senha")]
-    public string Senha { get; set; }
-    
+    public string Senha { get; set; } = string.Empty;
+
     [Required]
-    [Column("funcao")]
-    public required string Funcao { get; set; }
-    
-    // Relacionamento um-para-muitos com AuditoriaMovimentacao
+    public string Funcao { get; set; } = string.Empty;
+
     public virtual ICollection<Auditoria> Auditorias { get; set; } = new List<Auditoria>();
 }

@@ -7,16 +7,16 @@ namespace TrackingCodeApi.models;
 public class Auditoria
 {
     [Key]
-    [Column("id_audit")]
+    [Column("ID_AUDIT")]
     public int IdAudit { get; set; }
 
     [Required]
     [Column("id_funcionario")]
     public int IdFuncionario { get; set; }
 
-    [Required]
+
     [Column("tipo_operacao")]
-    public string TipoOperacao { get; set; }
+    public required  string TipoOperacao { get; set; } = string.Empty; 
 
     [Required]
     [Column("data_operacao")]

@@ -22,7 +22,7 @@ using TrackingCodeApi.dtos.usuario;
 using TrackingCodeApi.dtos.common;
 using TrackingCodeApi.services;
 
-namespace TrackingCodeApi.configs
+namespace TrackingCodeAPI.configs
 {
     public static class ServicesConfigurator
     {
@@ -62,6 +62,7 @@ namespace TrackingCodeApi.configs
                 opt.UseOracle(oracleConnectionString));
 
             // ------------------ Swagger / OpenAPI ------------------
+            services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo

@@ -8,36 +8,42 @@ namespace TrackingCodeApi.models;
 public class Moto
 {
     [Key]
-    [Column("chassi")]
-    public string Chassi { get; set; } // O Chassi será a chave primária
-    
-    [Column("placa")]
-    public string? Placa { get; set; } 
-    
+    [Column("CHASSI", TypeName = "CHAR(17)")] 
+    public string Chassi { get; set; } = string.Empty;
+
+    [Column("PLACA", TypeName = "CHAR(7)")]
+    public string? Placa { get; set; }
+
     [Required]
-    [Column("modelo")]
-    public string Modelo { get; set; }
-    
-    [Column("data_cadastro")]
+    [Column("MODELO", TypeName = "VARCHAR2(30)")]
+    public string Modelo { get; set; } = string.Empty;
+
+    [Required]
+    [Column("DATA_CADASTRO")]
     public DateTime DataCadastro { get; set; } = DateTime.Now;
-    
-    [Column("codigo_tag")]
-    public string CodigoTag { get; set; }
-    
+
     [Required]
-    [Column("id_setor")]
+    [Column("ID_SETOR")]
     public int IdSetor { get; set; }
 
-    [Column("id_audit")]
+    [Column("ID_AUDIT")]
     public int? IdAudit { get; set; }
 
-    // Propriedades de navegação
+    // 🔗 Relacionamentos
     [JsonIgnore]
-    public virtual Tag Tag { get; set; }
-    
-    [JsonIgnore]
+    [ForeignKey("IdSetor")]
     public virtual Setor Setor { get; set; }
+    
+    [Column("codigo_tag")]
+    public int CodigoTag { get; set; }
 
     [JsonIgnore]
+    [ForeignKey("IdAudit")]
     public virtual Auditoria? Auditoria { get; set; }
+
+    [JsonIgnore]
+    public virtual Tag? Tag { get; set; } // Se houver uma FK, adicione [ForeignKey("CodigoTag")]
 }
+
+
+

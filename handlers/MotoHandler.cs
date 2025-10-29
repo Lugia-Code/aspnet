@@ -1,100 +1,87 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using TrackingCodeApi.repos.moto;
-using TrackingCodeApi.repos.setor;
 using TrackingCodeApi.repos.tag;
+using TrackingCodeApi.repos.setor;
 using TrackingCodeApi.models;
+using AutoMapper;
 using TrackingCodeApi.dtos.moto;
 
-namespace TrackingCodeApi.handlers;
-
-public static class MotoHandler
+namespace TrackingCodeApi.handlers
 {
-    public static void MapMotoEndpoints(this IEndpointRouteBuilder app)
+    public static class MotoHandler
     {
-        var motoGroup = app.MapGroup("/api/v1/motos")
-            .WithTags("Motos")
-            .WithOpenApi();
-
-        //  GET /api/v1/motos
-        motoGroup.MapGet("/", async (
-            IMotoRepository motoRepo,
-            ISetorRepository setorRepo,
-            ITagRepository tagRepo,
-            IMapper mapper,
-            int page = 1,
-            int pageSize = 10) =>
+        public static void MapEndpoints(IEndpointRouteBuilder app)
         {
-            var motos = await motoRepo.GetPagedAsync(page, pageSize);
+            var group = app.MapGroup("/api/v1/motos")
+                .WithTags("Motos")
+                .WithOpenApi();
 
-            var result = motos.Select(m => new
+            // GET paginado
+            group.MapGet("/", async (IMotoRepository motoRepo, IMapper mapper, int page = 1, int pageSize = 10) =>
             {
-                chassi = m.Chassi,
-                placa = m.Placa,
-                modelo = m.Modelo,
-                dataCadastro = m.DataCadastro,
-                setor = m.Setor != null ? new { m.Setor.IdSetor, m.Setor.Nome } : null,
-                tag = m.Tag != null ? new { m.Tag.CodigoTag, m.Tag.Status, m.Tag.DataVinculo } : null
-            });
+                var motos = await motoRepo.GetPagedAsync(page, pageSize);
+                var dtos = mapper.Map<IEnumerable<MotoDto>>(motos);
+                return Results.Ok(dtos);
+            })
+            .WithSummary("Lista todas as motos (paginado)")
+            .WithDescription("Retorna uma lista de motos cadastradas no sistema, com suporte a paginação.");
 
-            var totalCount = await motoRepo.CountAsync();
-
-            return Results.Ok(new
+            // GET por ID
+            group.MapGet("/{id}", async (string id, IMotoRepository motoRepo, IMapper mapper) =>
             {
-                data = result,
-                pagination = new
+                var moto = await motoRepo.FindAsyncById(id);
+                if (moto == null)
+                    return Results.NotFound(new { erro = "Moto não encontrada" });
+
+                return Results.Ok(mapper.Map<MotoDto>(moto));
+            })
+            .WithSummary("Busca uma moto pelo ID (chassi)");
+
+            // 🔹 POST - Criação
+            group.MapPost("/", async (
+                MotoDto dto,
+                IMotoRepository motoRepo,
+                ITagRepository tagRepo,
+                ISetorRepository setorRepo,
+                IMapper mapper,
+                TrackingCodeDb db) =>
+            {
+                // Validação de Setor
+                var setor = await setorRepo.GetByIdAsync(dto.IdSetor);
+                if (setor == null)
+                    return Results.BadRequest(new { erro = "Setor não encontrado", campo = "idSetor" });
+
+                // Validação de Tag
+                var tag = await tagRepo.GetByCodigoAsync(dto.CodigoTag);
+                if (tag == null || !tag.EstaDisponivel)
+                    return Results.BadRequest(new { erro = "Tag inválida ou indisponível", campo = "codigoTag" });
+
+                using var transaction = await db.Database.BeginTransactionAsync();
+                try
                 {
-                    page,
-                    pageSize,
-                    totalCount,
-                    totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                    var moto = mapper.Map<Moto>(dto);
+                    moto.DataCadastro = DateTime.Now;
+
+                    await motoRepo.AddAsync(moto);
+
+                    // Marca a tag como não disponível
+                    tag.Status = "Inativo";
+                    await tagRepo.UpdateAsync(tag);
+
+                    await transaction.CommitAsync();
+                    return Results.Created($"/api/v1/motos/{moto.Chassi}", mapper.Map<MotoDto>(moto));
                 }
-            });
-        })
-        .WithSummary("Lista todas as motos com paginação")
-        .WithDescription("Retorna todas as motos cadastradas, com informações de setor e tag.")
-        .WithOpenApi();
-
-        //  GET /api/v1/motos/{chassi}
-        motoGroup.MapGet("/{chassi}", async (string chassi, IMotoRepository motoRepo, IMapper mapper) =>
-        {
-            var moto = await motoRepo.GetByChassiAsync(chassi);
-            if (moto == null)
-                return Results.NotFound(new { erro = "Moto não encontrada" });
-
-            var dto = mapper.Map<MotoDto>(moto);
-            return Results.Ok(dto);
-        })
-        .WithSummary("Busca moto por chassi")
-        .WithDescription("Retorna detalhes completos de uma moto pelo chassi.")
-        .WithOpenApi();
-
-        //  POST /api/v1/motos
-        motoGroup.MapPost("/", async (MotoDto dto, IMotoRepository motoRepo, ITagRepository tagRepo, ISetorRepository setorRepo, IMapper mapper) =>
-        {
-            // Validação de existência de setor e tag
-            var setor = await setorRepo.GetByIdAsync(dto.IdSetor);
-            if (setor == null)
-                return Results.BadRequest(new { erro = "Setor não encontrado", campo = "idSetor" });
-
-            var tag = await tagRepo.GetByCodigoAsync(dto.CodigoTag);
-            if (tag == null || !tag.EstaDisponivel)
-                return Results.BadRequest(new { erro = "Tag inválida ou indisponível", campo = "codigoTag" });
-
-            // Criação da moto
-            var moto = mapper.Map<Moto>(dto);
-            moto.DataCadastro = DateTime.Now;
-
-            await motoRepo.AddAsync(moto);
-            await motoRepo.SaveAsync();
-
-            return Results.Created($"/api/v1/motos/{moto.Chassi}", mapper.Map<MotoDto>(moto));
-        })
-        .WithSummary("Cadastra uma nova moto")
-        .WithDescription("Cria uma nova motocicleta vinculando tag e setor existentes.")
-        .WithOpenApi();
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    return Results.Problem("Erro ao cadastrar moto.");
+                }
+            })
+            .WithSummary("Cadastra uma nova moto")
+            .WithDescription("Cria uma moto e vincula uma tag e setor, validando disponibilidade e consistência.");
+        }
     }
 }

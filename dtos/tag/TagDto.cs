@@ -6,4 +6,5 @@ public record TagDto(
     int Bateria,
     DateTime DataVinculo,
     string? Chassi
+    
 );

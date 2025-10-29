@@ -20,7 +20,7 @@ public class Localizacao
 
     [Required]
     [Column("codigo_tag")]
-    public string CodigoTag { get; set; }
+    public int CodigoTag { get; set; }
 
     [Required]
     [Column("id_setor")]

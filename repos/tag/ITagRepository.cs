@@ -10,7 +10,7 @@ namespace TrackingCodeApi.repos.tag
         Task<int> CountAsync();
         Task<Tag?> GetByCodigoAsync(int codigo);
         Task<Tag?> GetByIdAsync(int id);
-        Task AddAsync(Tag tag);
+        Task<Tag> CreateAsync(Tag tag);
         Task UpdateAsync(Tag tag);
         Task DeleteAsync(Tag tag);
         Task SaveAsync();

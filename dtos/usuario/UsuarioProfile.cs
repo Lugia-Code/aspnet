@@ -1,19 +1,13 @@
-namespace TrackingCodeApi.dtos.usuario;
-
 using AutoMapper;
 using TrackingCodeApi.models;
 
-
+namespace TrackingCodeApi.dtos.usuario;
 
 public class UsuarioProfile : Profile
 {
     public UsuarioProfile()
     {
-        // Map model → DTO
-        CreateMap<Usuario, UsuarioReadDto>();
-
-        // Map DTO → model
-        CreateMap<UsuarioCreateDto, Usuario>();
-        CreateMap<UsuarioUpdateDto, Usuario>();
+        CreateMap<Usuario, UsuarioDto>();
+        CreateMap<UsuarioDto, Usuario>();
     }
 }

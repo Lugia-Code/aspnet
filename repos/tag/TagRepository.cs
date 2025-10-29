@@ -32,14 +32,14 @@ namespace TrackingCodeApi.repos.tag
             return await _db.Tags.CountAsync();
         }
 
-        // 🔹 Busca uma tag pelo código (usado no MotoHandler)
+        // 🔹 Busca uma tag pelo código (pode ser string ou int, conforme seu model)
         public async Task<Tag?> GetByCodigoAsync(int codigo)
         {
             return await _db.Tags
                 .FirstOrDefaultAsync(t => t.CodigoTag == codigo);
         }
 
-        //  Busca uma tag pelo ID
+        // 🔹 Busca por ID
         public async Task<Tag?> GetByIdAsync(int id)
         {
             return await _db.Tags
@@ -47,27 +47,29 @@ namespace TrackingCodeApi.repos.tag
                 .FirstOrDefaultAsync(t => t.CodigoTag == id);
         }
 
-        //  Cria uma nova tag (não salva imediatamente)
-        public async Task AddAsync(Tag tag)
+        // 🔹 Cria e salva uma nova tag (usado pelo Handler)
+        public async Task<Tag> CreateAsync(Tag tag)
         {
             await _db.Tags.AddAsync(tag);
+            await _db.SaveChangesAsync();
+            return tag;
         }
 
-        //  Atualiza uma tag existente
+        // 🔹 Atualiza uma tag existente
         public async Task UpdateAsync(Tag tag)
         {
             _db.Tags.Update(tag);
             await _db.SaveChangesAsync();
         }
 
-        //  Remove uma tag
+        // 🔹 Remove uma tag
         public async Task DeleteAsync(Tag tag)
         {
             _db.Tags.Remove(tag);
             await _db.SaveChangesAsync();
         }
 
-        //  Persiste as alterações pendentes
+        // 🔹 Persiste alterações pendentes (opcional)
         public async Task SaveAsync()
         {
             await _db.SaveChangesAsync();
