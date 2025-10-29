@@ -19,7 +19,7 @@ namespace TrackingCodeApi.handlers
                 .WithTags("Motos")
                 .WithOpenApi();
 
-            // GET paginado
+            // 🔹 GET paginado
             group.MapGet("/", async (IMotoRepository motoRepo, IMapper mapper, int page = 1, int pageSize = 10) =>
             {
                 var motos = await motoRepo.GetPagedAsync(page, pageSize);
@@ -29,7 +29,7 @@ namespace TrackingCodeApi.handlers
             .WithSummary("Lista todas as motos (paginado)")
             .WithDescription("Retorna uma lista de motos cadastradas no sistema, com suporte a paginação.");
 
-            // GET por ID
+            // 🔹 GET por chassi
             group.MapGet("/{id}", async (string id, IMotoRepository motoRepo, IMapper mapper) =>
             {
                 var moto = await motoRepo.FindAsyncById(id);
@@ -39,44 +39,82 @@ namespace TrackingCodeApi.handlers
                 return Results.Ok(mapper.Map<MotoDto>(moto));
             })
             .WithSummary("Busca uma moto pelo ID (chassi)");
-     
-            
+
+            // 🔹 PATCH - Desvincular Tag de uma Moto
+            group.MapPatch("/{chassi}/desvincular-tag", async (
+                string chassi,
+                IMotoRepository motoRepo,
+                ITagRepository tagRepo,
+                TrackingCodeDb db) =>
+            {
+                var moto = await motoRepo.FindAsyncById(chassi);
+                if (moto == null)
+                    return Results.NotFound(new { erro = "Moto não encontrada" });
+
+                // Verificar se existe tag vinculada a essa moto
+                bool existeTag = await tagRepo.AnyWithChassiAsync(chassi);
+                if (!existeTag)
+                    return Results.BadRequest(new { erro = "Nenhuma tag está vinculada a esta moto." });
+
+                using var transaction = await db.Database.BeginTransactionAsync();
+                try
+                {
+                    // Buscar e atualizar a tag vinculada
+                    var tag = await db.Tag.FirstOrDefaultAsync(t => t.Chassi == chassi);
+                    if (tag != null)
+                    {
+                        tag.Chassi = null;
+                        tag.DataVinculo = tag.DataVinculo;
+                        tag.Status = "inativo"; 
+                        await tagRepo.UpdateAsync(tag);
+                    }
+
+                    await transaction.CommitAsync();
+                    return Results.Ok(new { mensagem = "Tag desvinculada com sucesso." });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return Results.Problem($"Erro ao desvincular tag: {ex.Message}");
+                }
+            })
+            .WithSummary("Desvincula a tag de uma moto")
+            .WithDescription("Remove a associação da tag com a moto e a marca como INATIVA.");
+
+            //  DELETE - Excluir Moto
             group.MapDelete("/{chassi}", async (
                 string chassi,
                 IMotoRepository motoRepo,
                 ITagRepository tagRepo,
                 TrackingCodeDb db) =>
             {
-                // Buscar a moto pelo chassi
                 var moto = await motoRepo.FindAsyncById(chassi);
                 if (moto == null)
                     return Results.NotFound(new { erro = "Moto não encontrada" });
 
+                // Impedir exclusão se a moto ainda tiver uma tag vinculada
+                bool possuiTag = await tagRepo.AnyWithChassiAsync(chassi);
+                if (possuiTag)
+                    return Results.BadRequest(new { erro = "A moto ainda possui uma tag vinculada. Desvincule antes de excluir." });
+
                 using var transaction = await db.Database.BeginTransactionAsync();
                 try
                 {
-                    // Se houver alguma lógica para o campo Chassi, pode ser implementada aqui.
-                    // Não há necessidade de verificar se a moto tem código de tag, pois você disse que a coluna foi excluída.
-
-                    // Deletar a moto
                     await motoRepo.DeleteAsync(moto);
-
-                    // Commit da transação
                     await transaction.CommitAsync();
 
-                    return Results.NoContent();  // Retorna sucesso (204 No Content)
+                    return Results.NoContent();
                 }
                 catch (Exception ex)
                 {
-                    // Caso ocorra erro durante a operação
                     await transaction.RollbackAsync();
-                    return Results.Problem($"Erro ao deletar a moto: {ex.Message}");
+                    return Results.Problem($"Erro ao deletar moto: {ex.Message}");
                 }
-            });
+            })
+            .WithSummary("Remove uma moto")
+            .WithDescription("Exclui uma moto do sistema, apenas se ela não possuir tag vinculada.");
 
-
-            
-            // 🔹 POST - Criação
+            //  POST - Criação
             group.MapPost("/", async (
                 MotoDto dto,
                 IMotoRepository motoRepo,
@@ -103,17 +141,19 @@ namespace TrackingCodeApi.handlers
 
                     await motoRepo.AddAsync(moto);
 
-                    // Marca a tag como não disponível
-                    tag.Status = "Inativo";
+                    // Marca a tag como ativa
+                    tag.Status = "ativa"; 
+                    tag.Chassi = moto.Chassi;
+                    tag.DataVinculo = DateTime.Now;
                     await tagRepo.UpdateAsync(tag);
 
                     await transaction.CommitAsync();
                     return Results.Created($"/api/v1/motos/{moto.Chassi}", mapper.Map<MotoDto>(moto));
                 }
-                catch
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    return Results.Problem("Erro ao cadastrar moto.");
+                    return Results.Problem($"Erro ao cadastrar moto: {ex.Message}");
                 }
             })
             .WithSummary("Cadastra uma nova moto")
