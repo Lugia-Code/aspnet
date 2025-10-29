@@ -16,7 +16,7 @@ namespace TrackingCodeApi.handlers
                 .WithTags("Tags")
                 .WithOpenApi();
 
-            // 🔹 GET paginado
+            // GET paginado
             group.MapGet("/", async (ITagRepository repo, IMapper mapper, int page = 1, int pageSize = 10) =>
                 {
                     var tags = await repo.GetPagedAsync(page, pageSize);
@@ -25,8 +25,8 @@ namespace TrackingCodeApi.handlers
                 })
                 .WithSummary("Lista todas as tags (paginado)");
 
-            // 🔹 GET por código
-            group.MapGet("/{codigo:int}", async (int codigo, ITagRepository repo, IMapper mapper) =>
+            // GET por código
+            group.MapGet("/{codigo}", async (string codigo, ITagRepository repo, IMapper mapper) =>
                 {
                     var tag = await repo.GetByCodigoAsync(codigo);
                     if (tag == null)
@@ -36,12 +36,29 @@ namespace TrackingCodeApi.handlers
                 })
                 .WithSummary("Busca uma tag pelo código");
 
-            // 🔹 POST - criação
+            // POST - criação com validação de chassi
             group.MapPost("/", async (TagDto dto, ITagRepository repo, IMapper mapper) =>
                 {
-                    var tag = mapper.Map<Tag>(dto);
-                    await repo.CreateAsync(tag);
-                    return Results.Created($"/api/v1/tags/{tag.CodigoTag}", mapper.Map<TagDto>(tag));
+                    try
+                    {
+                        var tag = mapper.Map<Tag>(dto);
+
+                        // Valida se já existe outra tag com o mesmo chassi
+                        if (!string.IsNullOrWhiteSpace(tag.Chassi))
+                        {
+                            var chassiExistente = await repo.AnyWithChassiAsync(tag.Chassi);
+                            if (chassiExistente)
+                                return Results.BadRequest(new { erro = $"Chassi {tag.Chassi} já está vinculado a outra tag." });
+                        }
+
+                        // Cria a tag
+                        await repo.CreateAsync(tag);
+                        return Results.Created($"/api/v1/tags/{tag.CodigoTag}", mapper.Map<TagDto>(tag));
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.Problem(ex.Message);
+                    }
                 })
                 .WithSummary("Cria uma nova tag");
         }

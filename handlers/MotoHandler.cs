@@ -39,7 +39,43 @@ namespace TrackingCodeApi.handlers
                 return Results.Ok(mapper.Map<MotoDto>(moto));
             })
             .WithSummary("Busca uma moto pelo ID (chassi)");
+     
+            
+            group.MapDelete("/{chassi}", async (
+                string chassi,
+                IMotoRepository motoRepo,
+                ITagRepository tagRepo,
+                TrackingCodeDb db) =>
+            {
+                // Buscar a moto pelo chassi
+                var moto = await motoRepo.FindAsyncById(chassi);
+                if (moto == null)
+                    return Results.NotFound(new { erro = "Moto não encontrada" });
 
+                using var transaction = await db.Database.BeginTransactionAsync();
+                try
+                {
+                    // Se houver alguma lógica para o campo Chassi, pode ser implementada aqui.
+                    // Não há necessidade de verificar se a moto tem código de tag, pois você disse que a coluna foi excluída.
+
+                    // Deletar a moto
+                    await motoRepo.DeleteAsync(moto);
+
+                    // Commit da transação
+                    await transaction.CommitAsync();
+
+                    return Results.NoContent();  // Retorna sucesso (204 No Content)
+                }
+                catch (Exception ex)
+                {
+                    // Caso ocorra erro durante a operação
+                    await transaction.RollbackAsync();
+                    return Results.Problem($"Erro ao deletar a moto: {ex.Message}");
+                }
+            });
+
+
+            
             // 🔹 POST - Criação
             group.MapPost("/", async (
                 MotoDto dto,
@@ -55,9 +91,9 @@ namespace TrackingCodeApi.handlers
                     return Results.BadRequest(new { erro = "Setor não encontrado", campo = "idSetor" });
 
                 // Validação de Tag
-                var tag = await tagRepo.GetByCodigoAsync(dto.CodigoTag);
+                var tag = await tagRepo.GetByCodigoAsync(dto.Chassi);
                 if (tag == null || !tag.EstaDisponivel)
-                    return Results.BadRequest(new { erro = "Tag inválida ou indisponível", campo = "codigoTag" });
+                    return Results.BadRequest(new { erro = "Tag inválida ou indisponível", campo = "Chassi" });
 
                 using var transaction = await db.Database.BeginTransactionAsync();
                 try

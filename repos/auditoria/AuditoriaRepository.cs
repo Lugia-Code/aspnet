@@ -16,12 +16,12 @@ namespace TrackingCodeApi.repos.auditoria
 
         public async Task<Auditoria?> FindAsyncById(int id)
         {
-            return await _db.Auditorias.FirstOrDefaultAsync(a => a.IdAudit == id);
+            return await _db.Auditoria.FirstOrDefaultAsync(a => a.IdAudit == id);
         }
 
         public async Task<Auditoria> CreateAsync(Auditoria auditoria)
         {
-            _db.Auditorias.Add(auditoria);
+            _db.Auditoria.Add(auditoria);
             await _db.SaveChangesAsync();
             return auditoria;
         }

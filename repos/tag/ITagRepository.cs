@@ -8,11 +8,16 @@ namespace TrackingCodeApi.repos.tag
     {
         Task<IEnumerable<Tag>> GetPagedAsync(int page, int pageSize);
         Task<int> CountAsync();
-        Task<Tag?> GetByCodigoAsync(int codigo);
-        Task<Tag?> GetByIdAsync(int id);
+        Task<Tag?> GetByCodigoAsync(string codigo);
+        Task<Tag?> GetByIdAsync(string id);
         Task<Tag> CreateAsync(Tag tag);
         Task UpdateAsync(Tag tag);
         Task DeleteAsync(Tag tag);
         Task SaveAsync();
+        
+        Task<bool> AnyWithChassiAsync(string chassi);
     }
 }
+
+
+

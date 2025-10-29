@@ -15,11 +15,11 @@ namespace TrackingCodeApi.repos.tag
             _db = db;
         }
 
-        // 🔹 Retorna uma lista paginada de tags
+        //  Retorna uma lista paginada de tags
         public async Task<IEnumerable<Tag>> GetPagedAsync(int page, int pageSize)
         {
-            return await _db.Tags
-                .OrderBy(t => t.CodigoTag)
+            return await _db.Tag
+                .OrderBy(t => t.Chassi )
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .AsNoTracking()
@@ -29,28 +29,28 @@ namespace TrackingCodeApi.repos.tag
         // 🔹 Conta total de registros
         public async Task<int> CountAsync()
         {
-            return await _db.Tags.CountAsync();
+            return await _db.Tag.CountAsync();
         }
 
-        // 🔹 Busca uma tag pelo código (pode ser string ou int, conforme seu model)
-        public async Task<Tag?> GetByCodigoAsync(int codigo)
+    
+        public async Task<Tag?> GetByCodigoAsync(string codigo)
         {
-            return await _db.Tags
-                .FirstOrDefaultAsync(t => t.CodigoTag == codigo);
+            return await _db.Tag
+                .FirstOrDefaultAsync(t => t.Chassi == codigo);
         }
 
-        // 🔹 Busca por ID
-        public async Task<Tag?> GetByIdAsync(int id)
+        //  Busca por ID
+        public async Task<Tag?> GetByIdAsync(string id)
         {
-            return await _db.Tags
+            return await _db.Tag
                 .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.CodigoTag == id);
+                .FirstOrDefaultAsync(t => t.Chassi == id);
         }
 
         // 🔹 Cria e salva uma nova tag (usado pelo Handler)
         public async Task<Tag> CreateAsync(Tag tag)
         {
-            await _db.Tags.AddAsync(tag);
+            await _db.Tag.AddAsync(tag);
             await _db.SaveChangesAsync();
             return tag;
         }
@@ -58,14 +58,14 @@ namespace TrackingCodeApi.repos.tag
         // 🔹 Atualiza uma tag existente
         public async Task UpdateAsync(Tag tag)
         {
-            _db.Tags.Update(tag);
+            _db.Tag.Update(tag);
             await _db.SaveChangesAsync();
         }
 
         // 🔹 Remove uma tag
         public async Task DeleteAsync(Tag tag)
         {
-            _db.Tags.Remove(tag);
+            _db.Tag.Remove(tag);
             await _db.SaveChangesAsync();
         }
 
@@ -74,5 +74,22 @@ namespace TrackingCodeApi.repos.tag
         {
             await _db.SaveChangesAsync();
         }
+        
+
+        public async Task<bool> AnyWithChassiAsync(string chassi)
+        {
+            if (string.IsNullOrWhiteSpace(chassi))
+                return false;
+
+            // Usa CountAsync > 0, que sempre gera SQL compatível com Oracle
+            var exists = await _db.Tag
+                .Where(t => t.Chassi == chassi)
+                .CountAsync();
+
+            return exists > 0;
+        }
+
     }
 }
+
+

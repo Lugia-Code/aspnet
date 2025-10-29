@@ -1,13 +1,13 @@
-namespace TrackingCodeApi.dtos.moto
+namespace TrackingCodeApi.dtos.moto;
+
+public record MotoDto
 {
-    public record MotoDto(
-        string Chassi,
-        string? Placa,
-        string Modelo,
-        DateTime? DataCadastro,
-        string? Setor,
-        int IdSetor,
-        int? IdAudit,
-        int CodigoTag 
-    );
+    public string Chassi { get; set; } = string.Empty;
+    public string? Placa { get; set; }
+    public string Modelo { get; set; } = string.Empty;
+    public DateTime? DataCadastro { get; set; } = DateTime.Now;
+    public string? Setor { get; set; }
+    public int IdSetor { get; set; }
+    public int? IdAudit { get; set; }
+
 }

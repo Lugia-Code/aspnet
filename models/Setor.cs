@@ -4,25 +4,27 @@ using Newtonsoft.Json;
 
 namespace TrackingCodeApi.models;
 
-[Table("setor")]
+
+[Table("SETOR")]
 public class Setor
 {
     [Key]
-    [Column("id_setor")]
+    [Column("ID_SETOR")]
     public int IdSetor { get; set; }
     
     [Required]
-    [Column("nome")]
+    [Column("NOME")]
     public string Nome { get; set; }
     
-    [Column("descricao")]
+    [Column("DESCRICAO")]
     public string? Descricao { get; set; }
     
-    [Column("coordenadas_limite")]
-    public double? CoordenadasLimite { get; set; }
+    // Corrigido o nome da coluna para "COORDENADAS_LIMITE"
+    [Column("COORDENADAS_LIMITE")]
+    public string? CoordenadasLimite { get; set; }
     
     [JsonIgnore]
-    public ICollection<Moto> Motos { get; set; } = new List<Moto>(); // Adicionamos uma coleção para o relacionamento
+    public ICollection<Moto> Motos { get; set; } = new List<Moto>(); // Relacionamento com a Moto
     [JsonIgnore]
-    public ICollection<Localizacao> Localizacoes { get; set; } = new List<Localizacao>();
+    public ICollection<Localizacao> Localizacoes { get; set; } = new List<Localizacao>(); // Relacionamento com Localizacao
 }

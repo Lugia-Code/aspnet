@@ -1,14 +1,17 @@
-namespace TrackingCodeApi.dtos.moto;
 using AutoMapper;
 using TrackingCodeApi.models;
-
-
+using TrackingCodeApi.dtos.moto;
 
 public class MotoProfile : Profile
 {
     public MotoProfile()
     {
-        CreateMap<Moto, MotoDto>();
-        CreateMap<MotoDto, Moto>();
+        CreateMap<Moto, MotoDto>()
+            .ForMember(dest => dest.Setor, opt => opt.MapFrom(src => src.Setor.Nome)) // pega o nome do setor
+            .ForMember(dest => dest.IdSetor, opt => opt.MapFrom(src => src.IdSetor))
+            .ForMember(dest => dest.DataCadastro, opt => opt.MapFrom(src => src.DataCadastro))
+            .ForMember(dest => dest.IdAudit, opt => opt.MapFrom(src => src.IdAudit))
+           
+            .ReverseMap();
     }
 }

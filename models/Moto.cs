@@ -34,15 +34,13 @@ public class Moto
     [ForeignKey("IdSetor")]
     public virtual Setor Setor { get; set; }
     
-    [Column("codigo_tag")]
-    public int CodigoTag { get; set; }
+
 
     [JsonIgnore]
     [ForeignKey("IdAudit")]
     public virtual Auditoria? Auditoria { get; set; }
 
-    [JsonIgnore]
-    public virtual Tag? Tag { get; set; } // Se houver uma FK, adicione [ForeignKey("CodigoTag")]
+
 }
 
 

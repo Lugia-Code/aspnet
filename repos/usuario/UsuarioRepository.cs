@@ -14,30 +14,30 @@ namespace TrackingCodeApi.repos.usuario
 
         public async Task<IEnumerable<Usuario>> GetAllAsync()
         {
-            return await _db.Usuarios.AsNoTracking().ToListAsync();
+            return await _db.Usuario.AsNoTracking().ToListAsync();
         }
 
         public async Task<Usuario?> GetByIdAsync(int id)
         {
-            return await _db.Usuarios.FirstOrDefaultAsync(u => u.IdFuncionario == id);
+            return await _db.Usuario.FirstOrDefaultAsync(u => u.IdFuncionario == id);
         }
 
         public async Task<Usuario> CreateAsync(Usuario usuario)
         {
-            await _db.Usuarios.AddAsync(usuario);
+            await _db.Usuario.AddAsync(usuario);
             await _db.SaveChangesAsync();
             return usuario;
         }
 
         public async Task UpdateAsync(Usuario usuario)
         {
-            _db.Usuarios.Update(usuario);
+            _db.Usuario.Update(usuario);
             await _db.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Usuario usuario)
         {
-            _db.Usuarios.Remove(usuario);
+            _db.Usuario.Remove(usuario);
             await _db.SaveChangesAsync();
         }
 
