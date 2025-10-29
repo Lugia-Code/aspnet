@@ -57,5 +57,13 @@ namespace TrackingCodeApi.repos.moto
         {
             await _db.SaveChangesAsync();
         }
+        
+        public async Task<IEnumerable<Moto>> GetBySetorAsync(int idSetor)
+        {
+            return await _db.Moto
+                .Where(m => m.IdSetor == idSetor)
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

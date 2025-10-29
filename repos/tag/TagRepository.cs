@@ -26,7 +26,7 @@ namespace TrackingCodeApi.repos.tag
                 .ToListAsync();
         }
 
-        // 🔹 Conta total de registros
+        // Conta total de registros
         public async Task<int> CountAsync()
         {
             return await _db.Tag.CountAsync();
@@ -47,7 +47,7 @@ namespace TrackingCodeApi.repos.tag
                 .FirstOrDefaultAsync(t => t.Chassi == id);
         }
 
-        // 🔹 Cria e salva uma nova tag (usado pelo Handler)
+        // Cria e salva uma nova tag (usado pelo Handler)
         public async Task<Tag> CreateAsync(Tag tag)
         {
             await _db.Tag.AddAsync(tag);
@@ -55,21 +55,21 @@ namespace TrackingCodeApi.repos.tag
             return tag;
         }
 
-        // 🔹 Atualiza uma tag existente
+        // Atualiza uma tag existente
         public async Task UpdateAsync(Tag tag)
         {
             _db.Tag.Update(tag);
             await _db.SaveChangesAsync();
         }
 
-        // 🔹 Remove uma tag
+        //  Remove uma tag
         public async Task DeleteAsync(Tag tag)
         {
             _db.Tag.Remove(tag);
             await _db.SaveChangesAsync();
         }
 
-        // 🔹 Persiste alterações pendentes (opcional)
+        // Persiste alterações pendentes (opcional)
         public async Task SaveAsync()
         {
             await _db.SaveChangesAsync();

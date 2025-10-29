@@ -11,5 +11,7 @@ namespace TrackingCodeApi.repos.moto
         Task DeleteAsync(Moto moto);
         Task<int> CountAsync();
         Task SaveAsync();
+        Task<IEnumerable<Moto>> GetBySetorAsync(int idSetor);
+
     }
 }
