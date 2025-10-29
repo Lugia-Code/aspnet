@@ -8,6 +8,7 @@ using TrackingCodeApi.repos.setor;
 using TrackingCodeApi.models;
 using AutoMapper;
 using TrackingCodeApi.dtos.moto;
+using TrackingCodeApi.dtos.tag;
 
 namespace TrackingCodeApi.handlers
 {
@@ -170,48 +171,39 @@ namespace TrackingCodeApi.handlers
 
             //  POST - Criação
             group.MapPost("/", async (
-                MotoDto dto,
-                IMotoRepository motoRepo,
-                ITagRepository tagRepo,
-                ISetorRepository setorRepo,
-                IMapper mapper,
-                TrackingCodeDb db) =>
-            {
-                // Validação de Setor
-                var setor = await setorRepo.GetByIdAsync(dto.IdSetor);
-                if (setor == null)
-                    return Results.BadRequest(new { erro = "Setor não encontrado", campo = "idSetor" });
-
-                // Validação de Tag
-                var tag = await tagRepo.GetByCodigoAsync(dto.Chassi);
-                if (tag == null || !tag.EstaDisponivel)
-                    return Results.BadRequest(new { erro = "Tag inválida ou indisponível", campo = "Chassi" });
-
-                using var transaction = await db.Database.BeginTransactionAsync();
-                try
+                    MotoDto dto,
+                    IMotoRepository motoRepo,
+                    ISetorRepository setorRepo,
+                    IMapper mapper,
+                    TrackingCodeDb db) =>
                 {
-                    var moto = mapper.Map<Moto>(dto);
-                    moto.DataCadastro = DateTime.Now;
+                    // Validação de Setor
+                    var setor = await setorRepo.GetByIdAsync(dto.IdSetor);
+                    if (setor == null)
+                        return Results.BadRequest(new { erro = "Setor não encontrado", campo = "idSetor" });
 
-                    await motoRepo.AddAsync(moto);
+                    using var transaction = await db.Database.BeginTransactionAsync();
+                    try
+                    {
+                        // Mapeia DTO para entidade Moto
+                        var moto = mapper.Map<Moto>(dto);
+                        moto.DataCadastro = DateTime.Now;
 
-                    // Marca a tag como ativa
-                    tag.Status = "ativa"; 
-                    tag.Chassi = moto.Chassi;
-                    tag.DataVinculo = DateTime.Now;
-                    await tagRepo.UpdateAsync(tag);
+                        // Adiciona a moto no banco
+                        await motoRepo.AddAsync(moto);
 
-                    await transaction.CommitAsync();
-                    return Results.Created($"/api/v1/motos/{moto.Chassi}", mapper.Map<MotoDto>(moto));
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    return Results.Problem($"Erro ao cadastrar moto: {ex.Message}");
-                }
-            })
-            .WithSummary("Cadastra uma nova moto")
-            .WithDescription("Cria uma moto e vincula uma tag e setor, validando disponibilidade e consistência.");
-        }
+                        await transaction.CommitAsync();
+
+                        return Results.Created($"/api/v1/motos/{moto.Chassi}", mapper.Map<MotoDto>(moto));
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        return Results.Problem($"Erro ao cadastrar moto: {ex.Message}");
+                    }
+                })
+                .WithSummary("Cadastra uma nova moto")
+                .WithDescription("Cria uma moto no sistema sem exigir que exista uma tag vinculada.");
+
     }
-}
+} }
