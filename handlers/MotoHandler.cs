@@ -30,7 +30,7 @@ namespace TrackingCodeApi.handlers
             .WithSummary("Lista todas as motos (paginado)")
             .WithDescription("Retorna uma lista de motos cadastradas no sistema, com suporte a paginação.");
 
-            //  GET por chassi
+            // GET por chassi
             group.MapGet("/{id}", async (string id, IMotoRepository motoRepo, IMapper mapper) =>
             {
                 var moto = await motoRepo.FindAsyncById(id);
@@ -40,8 +40,8 @@ namespace TrackingCodeApi.handlers
                 return Results.Ok(mapper.Map<MotoDto>(moto));
             })
             .WithSummary("Busca uma moto pelo ID (chassi)");
-            
-            //  GET - Listar motos por setor
+
+            // GET - Listar motos por setor
             group.MapGet("/setor/{idSetor}", async (
                     int idSetor,
                     IMotoRepository motoRepo,
@@ -52,15 +52,14 @@ namespace TrackingCodeApi.handlers
                     if (setor == null)
                         return Results.NotFound(new { erro = "Setor não encontrado" });
 
-                    var motos = await motoRepo.GetBySetorAsync(idSetor); 
+                    var motos = await motoRepo.GetBySetorAsync(idSetor);
                     var dtos = mapper.Map<IEnumerable<MotoDto>>(motos);
                     return Results.Ok(dtos);
                 })
                 .WithSummary("Lista motos de um setor específico")
                 .WithDescription("Retorna todas as motos que pertencem a determinado setor.");
 
-
-            //  PATCH - Desvincular Tag de uma Moto
+            // PATCH - Desvincular Tag de uma Moto
             group.MapPatch("/{chassi}/desvincular-tag", async (
                 string chassi,
                 IMotoRepository motoRepo,
@@ -84,8 +83,7 @@ namespace TrackingCodeApi.handlers
                     if (tag != null)
                     {
                         tag.Chassi = null;
-                        tag.DataVinculo = tag.DataVinculo;
-                        tag.Status = "inativo"; 
+                        tag.Status = "inativo";
                         await tagRepo.UpdateAsync(tag);
                     }
 
@@ -101,7 +99,7 @@ namespace TrackingCodeApi.handlers
             .WithSummary("Desvincula a tag de uma moto")
             .WithDescription("Remove a associação da tag com a moto e a marca como INATIVA.");
 
-            //  DELETE - Excluir Moto
+            // DELETE - Excluir Moto
             group.MapDelete("/{chassi}", async (
                 string chassi,
                 IMotoRepository motoRepo,
@@ -133,7 +131,7 @@ namespace TrackingCodeApi.handlers
             })
             .WithSummary("Remove uma moto")
             .WithDescription("Exclui uma moto do sistema, apenas se ela não possuir tag vinculada.");
-            
+
             // PATCH - Trocar setor da moto
             group.MapPatch("/{chassi}/trocar-setor/{novoIdSetor}", async (
                     string chassi,
@@ -168,16 +166,16 @@ namespace TrackingCodeApi.handlers
                 .WithSummary("Troca o setor de uma moto")
                 .WithDescription("Altera o setor de uma moto existente para outro setor válido.");
 
-
-            //  POST - Criação
+                  //post
             group.MapPost("/", async (
                     MotoDto dto,
                     IMotoRepository motoRepo,
                     ISetorRepository setorRepo,
+                    ITagRepository tagRepo,
                     IMapper mapper,
                     TrackingCodeDb db) =>
                 {
-                    // Validação de Setor
+                
                     var setor = await setorRepo.GetByIdAsync(dto.IdSetor);
                     if (setor == null)
                         return Results.BadRequest(new { erro = "Setor não encontrado", campo = "idSetor" });
@@ -185,16 +183,37 @@ namespace TrackingCodeApi.handlers
                     using var transaction = await db.Database.BeginTransactionAsync();
                     try
                     {
-                        // Mapeia DTO para entidade Moto
+                        //  Cria a moto
                         var moto = mapper.Map<Moto>(dto);
                         moto.DataCadastro = DateTime.Now;
-
-                        // Adiciona a moto no banco
                         await motoRepo.AddAsync(moto);
+
+                        // Busca uma tag livre (sem chassi)
+                        var tagDisponivel = await db.Tag.FirstOrDefaultAsync(t => t.Chassi == null);
+                        if (tagDisponivel != null)
+                        {
+                            tagDisponivel.Chassi = moto.Chassi;
+                            tagDisponivel.Status = "ativo";
+                            tagDisponivel.DataVinculo = DateTime.Now;
+                            await tagRepo.UpdateAsync(tagDisponivel);
+                        }
 
                         await transaction.CommitAsync();
 
-                        return Results.Created($"/api/v1/motos/{moto.Chassi}", mapper.Map<MotoDto>(moto));
+                        //  Retorna resultado com informação da tag vinculada
+                        return Results.Created($"/api/v1/motos/{moto.Chassi}", new
+                        {
+                            mensagem = "Moto criada e tag vinculada com sucesso.",
+                            moto = mapper.Map<MotoDto>(moto),
+                            tagVinculada = tagDisponivel != null ? new
+                            {
+                                tagDisponivel.CodigoTag,
+                                tagDisponivel.Status,
+                                tagDisponivel.Bateria,
+                                tagDisponivel.DataVinculo,
+                                tagDisponivel.Chassi
+                            } : null
+                        });
                     }
                     catch (Exception ex)
                     {
@@ -202,8 +221,8 @@ namespace TrackingCodeApi.handlers
                         return Results.Problem($"Erro ao cadastrar moto: {ex.Message}");
                     }
                 })
-                .WithSummary("Cadastra uma nova moto")
-                .WithDescription("Cria uma moto no sistema sem exigir que exista uma tag vinculada.");
-
+                .WithSummary("Cadastra uma nova moto e vincula automaticamente uma tag disponível")
+                .WithDescription("Cria uma moto no sistema e associa automaticamente a primeira tag disponível (sem chassi).");
+        }
     }
-} }
+}
