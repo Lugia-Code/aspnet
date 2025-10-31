@@ -59,7 +59,6 @@ app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = Dat
 // ----------- Mapear Handlers -----------
 MotoHandler.MapEndpoints(app);
 TagHandler.MapEndpoints(app);
-UsuarioHandler.MapEndpoints(app);
 SetorHandler.MapEndpoints(app);
 
 // ----------- Swagger Dev -----------

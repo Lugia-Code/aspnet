@@ -2,7 +2,7 @@
 
 ---
 
-## 👥 Integrantes
+## Integrantes
 
 | Nome | RM |
 | :--- | :--- |
@@ -12,7 +12,7 @@
 
 ---
 
-## 📋 Justificativa da Arquitetura
+## Justificativa da Arquitetura
 
 ### Domínio Escolhido
 
@@ -62,7 +62,7 @@ Este sistema foi desenvolvido para gerenciar o rastreamento de **motocicletas co
 
 1.  **Clone o repositório**
     ```bash
-    git clone <https://github.com/Lugia-Code/tracking-code-api.git>
+    git clone <https://github.com/Lugia-Code/aspnet.git>
     cd tracking-code-api
     ```
 
@@ -98,9 +98,9 @@ Este sistema foi desenvolvido para gerenciar o rastreamento de **motocicletas co
 
 ---
 
-## 📚 Exemplos de Uso dos Endpoints
+##  Exemplos de Uso dos Endpoints
 
-### 🏍️ Motos
+###  Motos
 
 | Ação | Método | Endpoint | Observações |
 | :--- | :--- | :--- | :--- |
@@ -161,7 +161,7 @@ Os exemplos a seguir mostram as requisições HTTP e as respostas obtidas no amb
 
 <br>
 
-### 🏷️ Tags
+###  Tags
 
 | Ação | Método | Endpoint | Observações |
 | :--- | :--- | :--- | :--- |
@@ -170,7 +170,7 @@ Os exemplos a seguir mostram as requisições HTTP e as respostas obtidas no amb
 
 <br>
 
-### 🏢 Setores
+###  Setores
 
 | Ação | Método | Endpoint | Observações |
 | :--- | :--- | :--- | :--- |
@@ -180,7 +180,7 @@ Os exemplos a seguir mostram as requisições HTTP e as respostas obtidas no amb
 
 -----
 
-## 🧪 Testes
+##  Testes
 
 O projeto possui **12 testes automatizados** para validar os endpoints da API.
 
@@ -216,7 +216,7 @@ Os testes validam:
 
 -----
 
-## 📊 Health Checks
+## Health Checks
 
 O sistema utiliza **Health Checks** para monitoramento.
 
@@ -294,6 +294,6 @@ Para desabilitar em desenvolvimento, comente a linha no `Program.cs`:
 
 -----
 
-## 📝 Licença
+## Licença
 
 Este projeto foi desenvolvido para fins acadêmicos na **FIAP**.

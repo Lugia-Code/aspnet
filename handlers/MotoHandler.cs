@@ -110,7 +110,7 @@ namespace TrackingCodeApi.handlers
                 if (moto == null)
                     return Results.NotFound(new { erro = "Moto não encontrada" });
 
-                // Impedir exclusão se a moto ainda tiver uma tag vinculada
+                
                 bool possuiTag = await tagRepo.AnyWithChassiAsync(chassi);
                 if (possuiTag)
                     return Results.BadRequest(new { erro = "A moto ainda possui uma tag vinculada. Desvincule antes de excluir." });
@@ -183,12 +183,12 @@ namespace TrackingCodeApi.handlers
                     using var transaction = await db.Database.BeginTransactionAsync();
                     try
                     {
-                        //  Cria a moto
+                        
                         var moto = mapper.Map<Moto>(dto);
                         moto.DataCadastro = DateTime.Now;
                         await motoRepo.AddAsync(moto);
 
-                        // Busca uma tag livre (sem chassi)
+                   
                         var tagDisponivel = await db.Tag.FirstOrDefaultAsync(t => t.Chassi == null);
                         if (tagDisponivel != null)
                         {
@@ -200,7 +200,7 @@ namespace TrackingCodeApi.handlers
 
                         await transaction.CommitAsync();
 
-                        //  Retorna resultado com informação da tag vinculada
+                       
                         return Results.Created($"/api/v1/motos/{moto.Chassi}", new
                         {
                             mensagem = "Moto criada e tag vinculada com sucesso.",

@@ -10,7 +10,7 @@ using TrackingCodeApi.repos.localizacao;
 using TrackingCodeApi.repos.moto;
 using TrackingCodeApi.repos.setor;
 using TrackingCodeApi.repos.tag;
-using TrackingCodeApi.repos.usuario;
+
 
 using TrackingCodeApi.models;
 using TrackingCodeApi.dtos.auditoria;
@@ -18,7 +18,7 @@ using TrackingCodeApi.dtos.localizacao;
 using TrackingCodeApi.dtos.moto;
 using TrackingCodeApi.dtos.setor;
 using TrackingCodeApi.dtos.tag;
-using TrackingCodeApi.dtos.usuario;
+
 using TrackingCodeApi.dtos.common;
 using TrackingCodeApi.services;
 
@@ -32,14 +32,12 @@ namespace TrackingCodeAPI.configs
             services.AddAutoMapper(typeof(AuditoriaProfile));
             services.AddAutoMapper(typeof(LocalizacaoProfile));
             services.AddAutoMapper(typeof(MotoProfile));
-            services.AddAutoMapper(typeof(UsuarioProfile));
             services.AddAutoMapper(typeof(PagedResponseProfile));
             services.AddAutoMapper(typeof(TagProfile));
             services.AddAutoMapper(typeof(SetorProfile));
 
             // ------------------ Repository DI ------------------
             services.AddScoped<IAuditoriaRepository, AuditoriaRepository>();
-            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<ISetorRepository, SetorRepository>();
             services.AddScoped<IMotoRepository, MotoRepository>();

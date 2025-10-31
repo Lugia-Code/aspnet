@@ -53,20 +53,20 @@ namespace TrackingCodeApi.handlers
                 if (setor == null)
                     return Results.NotFound(new { erro = "Setor não encontrado" });
 
-                // Passo 1: Atualizar ou excluir as localizações associadas a este setor
-                var localizacoes = await localizacaoRepo.GetBySetorIdAsync(id);  // Alterado para buscar todas as localizações do setor
+               
+                var localizacoes = await localizacaoRepo.GetBySetorIdAsync(id);  
                 foreach (var localizacao in localizacoes)
                 {
-                    // Remover ou atualizar as localizações. Aqui estamos apenas desvinculando.
-                    localizacao.IdSetor = 0;  // Desvincula a localização do setor
-                    await localizacaoRepo.UpdateAsync(localizacao);  // Atualiza a localização para desvincular o setor
+                   
+                    localizacao.IdSetor = 0;  
+                    await localizacaoRepo.UpdateAsync(localizacao);  
                 }
 
                 try
                 {
-                    // Passo 2: Deletar o setor
-                    await repo.DeleteAsync(setor);  // Deleta o setor após desvincular as localizações
-                    return Results.NoContent();  // Retorna 204 No Content em caso de sucesso
+                  
+                    await repo.DeleteAsync(setor);  
+                    return Results.NoContent();  
                 }
                 catch (Exception ex)
                 {

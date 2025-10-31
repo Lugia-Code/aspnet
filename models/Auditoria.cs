@@ -28,7 +28,5 @@ public class Auditoria
     [Column("valores_anteriores")]
     public string? ValoresAnteriores { get; set; }
 
-    // Propriedade de navegação
-    [ForeignKey("IdFuncionario")]
-    public virtual Usuario Usuario { get; set; }
+  
 }
