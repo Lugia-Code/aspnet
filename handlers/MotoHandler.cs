@@ -29,6 +29,8 @@ namespace TrackingCodeApi.handlers
             })
             .WithSummary("Lista todas as motos (paginado)")
             .WithDescription("Retorna uma lista de motos cadastradas no sistema, com suporte a paginação.");
+            
+           
 
             // GET por chassi
             group.MapGet("/{id}", async (string id, IMotoRepository motoRepo, IMapper mapper) =>
@@ -165,6 +167,9 @@ namespace TrackingCodeApi.handlers
                 })
                 .WithSummary("Troca o setor de uma moto")
                 .WithDescription("Altera o setor de uma moto existente para outro setor válido.");
+            
+            
+
 
                   //post
             group.MapPost("/", async (

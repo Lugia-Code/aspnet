@@ -6,6 +6,8 @@ using AutoMapper;
 using TrackingCodeApi.dtos.tag;
 using TrackingCodeApi.models;
 
+using TrackingCodeApi.ml;
+
 namespace TrackingCodeApi.handlers
 {
     public static class TagHandler
@@ -24,6 +26,21 @@ namespace TrackingCodeApi.handlers
                     return Results.Ok(dtos);
                 })
                 .WithSummary("Lista todas as tags (paginado)");
+            
+            // POST - Prever bateria da tag com ML.NET
+            group.MapPost("/prever-bateria", async (BatteryPredictionInput input) =>
+                {
+                    var mlService = new TrackingCodeApi.services.BatteryPredictionService();
+                    var resultado = mlService.Prever(input);
+
+                    return Results.Ok(new
+                    {
+                        mensagem = "Previsão realizada com sucesso!",
+                        bateriaPrevista = $"{resultado.BateriaPrevista:F2}%"
+                    });
+                })
+                .WithSummary("Prevê o nível de bateria de uma tag usando ML.NET")
+                .WithDescription("Recebe dados de uso e ambiente e retorna uma previsão de nível de bateria.");
 
             // GET por código
             group.MapGet("/{codigo}", async (string codigo, ITagRepository repo, IMapper mapper) =>

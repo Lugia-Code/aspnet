@@ -12,7 +12,7 @@ using TrackingCodeApi.models;
 namespace TrackingCodeApi.Migrations
 {
     [DbContext(typeof(TrackingCodeDb))]
-    [Migration("20251029021832_InitialCreate")]
+    [Migration("20251104014756_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -31,7 +31,7 @@ namespace TrackingCodeApi.Migrations
                     b.Property<int>("IdAudit")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
-                        .HasColumnName("id_audit");
+                        .HasColumnName("ID_AUDIT");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAudit"));
 
@@ -58,8 +58,6 @@ namespace TrackingCodeApi.Migrations
 
                     b.HasKey("IdAudit");
 
-                    b.HasIndex("IdFuncionario");
-
                     b.ToTable("AUDITORIA_MOVIMENTACAO", "RM558785");
                 });
 
@@ -72,8 +70,9 @@ namespace TrackingCodeApi.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdLocalizacao"));
 
-                    b.Property<int>("CodigoTag")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<string>("CodigoTag")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(450)")
                         .HasColumnName("codigo_tag");
 
                     b.Property<int>("IdSetor")
@@ -102,48 +101,35 @@ namespace TrackingCodeApi.Migrations
             modelBuilder.Entity("TrackingCodeApi.models.Moto", b =>
                 {
                     b.Property<string>("Chassi")
-                        .HasColumnType("NVARCHAR2(450)")
-                        .HasColumnName("chassi");
-
-                    b.Property<int?>("AuditoriaIdAudit")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.Property<int>("CodigoTag")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("codigo_tag");
+                        .HasColumnType("CHAR(17)")
+                        .HasColumnName("CHASSI");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("data_cadastro");
+                        .HasColumnName("DATA_CADASTRO");
 
                     b.Property<int?>("IdAudit")
                         .HasColumnType("NUMBER(10)")
-                        .HasColumnName("id_audit");
+                        .HasColumnName("ID_AUDIT");
 
                     b.Property<int>("IdSetor")
                         .HasColumnType("NUMBER(10)")
-                        .HasColumnName("id_setor");
+                        .HasColumnName("ID_SETOR");
 
                     b.Property<string>("Modelo")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("modelo");
+                        .HasColumnType("VARCHAR2(30)")
+                        .HasColumnName("MODELO");
 
                     b.Property<string>("Placa")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("placa");
-
-                    b.Property<int>("SetorIdSetor")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("CHAR(7)")
+                        .HasColumnName("PLACA");
 
                     b.HasKey("Chassi");
 
-                    b.HasIndex("AuditoriaIdAudit");
+                    b.HasIndex("IdAudit");
 
-                    b.HasIndex("CodigoTag")
-                        .IsUnique();
-
-                    b.HasIndex("SetorIdSetor");
+                    b.HasIndex("IdSetor");
 
                     b.ToTable("MOTO", "RM558785");
                 });
@@ -153,93 +139,58 @@ namespace TrackingCodeApi.Migrations
                     b.Property<int>("IdSetor")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(10)")
-                        .HasColumnName("id_setor");
+                        .HasColumnName("ID_SETOR");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdSetor"));
 
-                    b.Property<double?>("CoordenadasLimite")
-                        .HasColumnType("BINARY_DOUBLE")
-                        .HasColumnName("coordenadas_limite");
+                    b.Property<string>("CoordenadasLimite")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("COORDENADAS_LIMITE");
 
                     b.Property<string>("Descricao")
                         .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("descricao");
+                        .HasColumnName("DESCRICAO");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("nome");
+                        .HasColumnName("NOME");
 
                     b.HasKey("IdSetor");
 
-                    b.ToTable("setor", "RM558785");
+                    b.ToTable("SETOR", "RM558785");
                 });
 
             modelBuilder.Entity("TrackingCodeApi.models.Tag", b =>
                 {
-                    b.Property<int>("CodigoTag")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("codigo_tag");
+                    b.Property<string>("CodigoTag")
+                        .HasColumnType("NVARCHAR2(450)")
+                        .HasColumnName("CODIGO_TAG");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CodigoTag"));
+                    b.Property<int>("Bateria")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("BATERIA");
 
                     b.Property<string>("Chassi")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("chassi");
+                        .HasColumnType("CHAR(17)")
+                        .HasColumnName("CHASSI");
 
                     b.Property<DateTime>("DataVinculo")
                         .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("data_vinculo");
+                        .HasColumnName("DATA_VINCULO");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("status");
+                        .HasColumnName("STATUS");
 
                     b.HasKey("CodigoTag");
 
-                    b.ToTable("tag", "RM558785");
-                });
+                    b.HasIndex("Chassi")
+                        .IsUnique()
+                        .HasFilter("\"CHASSI\" IS NOT NULL");
 
-            modelBuilder.Entity("TrackingCodeApi.models.Usuario", b =>
-                {
-                    b.Property<int>("IdFuncionario")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdFuncionario"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<string>("Funcao")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<string>("Senha")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.HasKey("IdFuncionario");
-
-                    b.ToTable("USUARIO", "RM558785");
-                });
-
-            modelBuilder.Entity("TrackingCodeApi.models.Auditoria", b =>
-                {
-                    b.HasOne("TrackingCodeApi.models.Usuario", "Usuario")
-                        .WithMany("Auditorias")
-                        .HasForeignKey("IdFuncionario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
+                    b.ToTable("TAG", "RM558785");
                 });
 
             modelBuilder.Entity("TrackingCodeApi.models.Localizacao", b =>
@@ -265,25 +216,27 @@ namespace TrackingCodeApi.Migrations
                 {
                     b.HasOne("TrackingCodeApi.models.Auditoria", "Auditoria")
                         .WithMany()
-                        .HasForeignKey("AuditoriaIdAudit");
-
-                    b.HasOne("TrackingCodeApi.models.Tag", "Tag")
-                        .WithOne("Moto")
-                        .HasForeignKey("TrackingCodeApi.models.Moto", "CodigoTag")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("IdAudit");
 
                     b.HasOne("TrackingCodeApi.models.Setor", "Setor")
                         .WithMany("Motos")
-                        .HasForeignKey("SetorIdSetor")
+                        .HasForeignKey("IdSetor")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Auditoria");
 
                     b.Navigation("Setor");
+                });
 
-                    b.Navigation("Tag");
+            modelBuilder.Entity("TrackingCodeApi.models.Tag", b =>
+                {
+                    b.HasOne("TrackingCodeApi.models.Moto", "Moto")
+                        .WithOne()
+                        .HasForeignKey("TrackingCodeApi.models.Tag", "Chassi")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Moto");
                 });
 
             modelBuilder.Entity("TrackingCodeApi.models.Setor", b =>
@@ -296,13 +249,6 @@ namespace TrackingCodeApi.Migrations
             modelBuilder.Entity("TrackingCodeApi.models.Tag", b =>
                 {
                     b.Navigation("Localizacoes");
-
-                    b.Navigation("Moto");
-                });
-
-            modelBuilder.Entity("TrackingCodeApi.models.Usuario", b =>
-                {
-                    b.Navigation("Auditorias");
                 });
 #pragma warning restore 612, 618
         }
