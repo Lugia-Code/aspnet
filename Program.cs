@@ -36,7 +36,7 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
-            // Em produção, apenas aplica migrations pendentes
+            
             if (context.Database.GetPendingMigrations().Any())
             {
                 context.Database.Migrate();
