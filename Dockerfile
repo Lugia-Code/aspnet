@@ -12,13 +12,16 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copia tudo para dentro do container
+# 🔹 Copia o projeto, mas ignora bin/obj com .dockerignore
 COPY . .
 
-# Restaura dependências
+# 🔹 Limpa resíduos locais antes do build
+RUN dotnet clean "TrackingCodeAPI.csproj" && rm -rf bin obj
+
+# 🔹 Restaura dependências
 RUN dotnet restore "TrackingCodeAPI.csproj"
 
-# Compila e publica em modo Release
+# 🔹 Compila e publica
 RUN dotnet publish "TrackingCodeAPI.csproj" -c Release -o /app/publish
 
 # ---------------------------
@@ -26,9 +29,5 @@ RUN dotnet publish "TrackingCodeAPI.csproj" -c Release -o /app/publish
 # ---------------------------
 FROM base AS final
 WORKDIR /app
-
-# Copia o resultado da build
 COPY --from=build /app/publish .
-
-# Define o ponto de entrada da aplicação
 ENTRYPOINT ["dotnet", "TrackingCodeAPI.dll"]
