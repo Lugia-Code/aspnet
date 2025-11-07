@@ -26,6 +26,10 @@ RUN dotnet restore "./TrackingCodeAPI.csproj"
 COPY . .
 WORKDIR "/src"
 
+# 🔹 Limpa arquivos antigos e recompila do zero
+RUN dotnet clean "./TrackingCodeAPI.csproj" -c "$BUILD_CONFIGURATION"
+RUN rm -rf /src/bin /src/obj
+
 # Compila o projeto
 RUN dotnet build "./TrackingCodeAPI.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
