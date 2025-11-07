@@ -1,24 +1,25 @@
 # =========================
 # Etapa 1 — Imagem base (runtime)
 # =========================
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
 
-# Instala libs necessárias (Oracle, compatibilidade, etc)
-RUN apk add --no-cache \
-    libc6-compat \
-    libaio
+# Porta que o Azure App Service define via variável de ambiente PORT
+ENV ASPNETCORE_URLS=http://+:$PORT
+
+# Instala libs necessárias para Oracle ou compatibilidade
+RUN apt-get update && \
+    apt-get install -y libaio1 && \
+    rm -rf /var/lib/apt/lists/*
 
 # =========================
 # Etapa 2 — Build
 # =========================
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copia apenas o .csproj para restaurar dependências (cache eficiente)
+# Copia apenas o .csproj para restaurar dependências
 COPY ["TrackingCodeAPI.csproj", "./"]
 RUN dotnet restore "./TrackingCodeAPI.csproj"
 
@@ -44,12 +45,11 @@ WORKDIR /app
 # Copia o resultado do publish
 COPY --from=publish /app/publish .
 
-# Cria um usuário não-root para segurança
-RUN addgroup -g 1001 -S appuser && \
-    adduser -S appuser -G appuser -u 1001 && \
+# Cria usuário não-root (opcional, pode comentar se houver problemas de permissões)
+RUN groupadd -g 1001 appuser && \
+    useradd -m -u 1001 -g appuser appuser && \
     chown -R appuser:appuser /app
-
 USER appuser
 
-# Define o ponto de entrada de forma genérica
-ENTRYPOINT ["dotnet", "./TrackingCodeAPI.dll"]
+# Define ponto de entrada
+ENTRYPOINT ["dotnet", "TrackingCodeAPI.dll"]
