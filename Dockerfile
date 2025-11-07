@@ -1,26 +1,26 @@
-# Etapa base: imagem leve para execução
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-# Etapa de build
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-
-# Copia apenas o arquivo de projeto para restaurar dependências
 COPY ["TrackingCodeAPI.csproj", "./"]
+
+# 🔹 1️⃣ Restaura os pacotes
 RUN dotnet restore "TrackingCodeAPI.csproj"
 
-# Copia o restante do código
+# 🔹 2️⃣ Copia o resto do código
 COPY . .
 
-# ⚠️ Limpa builds anteriores (evita duplicações de AssemblyInfo)
+# 🔹 3️⃣ Roda um restore extra só para garantir
+RUN dotnet restore "TrackingCodeAPI.csproj"
+
+# 🔹 4️⃣ Limpa build anterior
 RUN dotnet clean "TrackingCodeAPI.csproj"
 
-# Publica em modo Release
+# 🔹 5️⃣ Compila e publica
 RUN dotnet publish "TrackingCodeAPI.csproj" -c Release -o /app/publish
 
-# Etapa final
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
