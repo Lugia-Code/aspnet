@@ -7,6 +7,11 @@
     <RootNamespace>TrackingCodeApi</RootNamespace>
   </PropertyGroup>
 
+<PropertyGroup>
+  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+</PropertyGroup>
+
+
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
