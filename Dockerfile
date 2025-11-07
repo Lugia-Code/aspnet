@@ -31,7 +31,9 @@ RUN dotnet clean "./TrackingCodeAPI.csproj" -c "$BUILD_CONFIGURATION"
 RUN rm -rf /src/bin /src/obj
 
 # Compila o projeto
-RUN dotnet build "./TrackingCodeAPI.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
+
+RUN dotnet build "./TrackingCodeAPI.csproj" -c "$BUILD_CONFIGURATION" -o /app/build --no-dependencies
+
 
 # =========================
 # Etapa 3 — Publicação
