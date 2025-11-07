@@ -11,14 +11,12 @@ using TrackingCodeApi.repos.moto;
 using TrackingCodeApi.repos.setor;
 using TrackingCodeApi.repos.tag;
 
-
 using TrackingCodeApi.models;
 using TrackingCodeApi.dtos.auditoria;
 using TrackingCodeApi.dtos.localizacao;
 using TrackingCodeApi.dtos.moto;
 using TrackingCodeApi.dtos.setor;
 using TrackingCodeApi.dtos.tag;
-
 using TrackingCodeApi.dtos.common;
 using TrackingCodeApi.services;
 
@@ -53,11 +51,16 @@ namespace TrackingCodeAPI.configs
                 options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            // ------------------ Database ------------------
-            var oracleConnectionString = Environment.GetEnvironmentVariable("ORACLE_CONNECTION_STRING");
+            // ------------------ Database (Azure SQL) ------------------
+            var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTION_STRING");
+
+            if (string.IsNullOrEmpty(sqlConnectionString))
+            {
+                throw new InvalidOperationException("A variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não foi configurada.");
+            }
 
             services.AddDbContext<TrackingCodeDb>(opt =>
-                opt.UseOracle(oracleConnectionString));
+                opt.UseSqlServer(sqlConnectionString));
 
             // ------------------ Swagger / OpenAPI ------------------
             services.AddEndpointsApiExplorer();
@@ -83,11 +86,10 @@ API para rastreamento e auditoria de motos, localizações e usuários no sistem
 - ✅ Paginação configurável
 - ✅ Validação com FluentValidation
 - ✅ Automapper para mapeamento de DTOs
-- ✅ Integração com Oracle Database
+- ✅ Integração com Azure SQL Database
 "
                 });
 
-                // Define tags para organização no Swagger
                 options.DocumentFilter<SwaggerTagDescriptions>();
             });
         }
