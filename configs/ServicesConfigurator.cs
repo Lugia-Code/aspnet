@@ -52,22 +52,10 @@ namespace TrackingCodeAPI.configs
             });
 
             // ------------------ Database ------------------
-            // 1️⃣ Tenta pegar do appsettings.json
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            // 2️⃣ Se não encontrar, tenta via variável de ambiente (Azure DevOps)
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                connectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING") 
-                                ?? Environment.GetEnvironmentVariable("ORACLE_CONNECTION_STRING");
-            }
-
-            if (string.IsNullOrEmpty(connectionString))
-                throw new InvalidOperationException("Nenhuma connection string foi encontrada. Verifique suas variáveis de ambiente ou o appsettings.json.");
-
-            // 3️⃣ Configura o banco
-            services.AddDbContext<TrackingCodeDb>(options =>
-                options.UseOracle(connectionString));
+    services.AddDbContext<TrackingCodeDb>(opt =>
+        opt.UseSqlServer(connectionString));
 
             // ------------------ Swagger / OpenAPI ------------------
             services.AddEndpointsApiExplorer();
