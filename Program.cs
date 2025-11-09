@@ -3,7 +3,7 @@ using TrackingCodeApi.handlers;
 using TrackingCodeApi.models;
 using Microsoft.EntityFrameworkCore;
 
-DotNetEnv.Env.Load();
+
 
 var builder = WebApplication.CreateBuilder(args);
 
