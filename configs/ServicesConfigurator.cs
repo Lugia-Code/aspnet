@@ -50,24 +50,27 @@ namespace TrackingCodeAPI.configs
             {
                 options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-
-            // ------------------ Database (Azure SQL) ------------------
             var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTION_STRING");
 
-            if (string.IsNullOrWhiteSpace(sqlConnectionString))
-            {
-                Console.WriteLine("⚠️ [WARN] Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Usando valor do appsettings.json...");
-                sqlConnectionString = configuration.GetConnectionString("DefaultConnection")
-                    ?? throw new InvalidOperationException("Nenhuma connection string configurada.");
-            }
-            else
-            {
-                Console.WriteLine("✅ [INFO] Conexão com Azure SQL obtida via variável de ambiente.");
-            }
+if (string.IsNullOrWhiteSpace(sqlConnectionString))
+{
+    Console.WriteLine("⚠️ [WARN] Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Tentando via Configuration...");
+    var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+    sqlConnectionString = configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<TrackingCodeDb>(opt =>
-                opt.UseSqlServer(sqlConnectionString));
+    if (string.IsNullOrWhiteSpace(sqlConnectionString))
+    {
+        Console.WriteLine("❌ Nenhuma connection string foi encontrada. Encerrando aplicação.");
+        throw new InvalidOperationException("A variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não foi configurada.");
+    }
+}
+else
+{
+    Console.WriteLine("✅ Connection string recebida do ambiente.");
+}
 
+services.AddDbContext<TrackingCodeDb>(opt =>
+    opt.UseSqlServer(sqlConnectionString));
             // ------------------ Swagger / OpenAPI ------------------
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
