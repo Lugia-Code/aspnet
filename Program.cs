@@ -98,7 +98,10 @@ else
     });
 }
 
-// ----------- Middlewares -----------
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.UseMi
+app.UseMiddleware<ApiKeyMiddleware>();
+
+
+await app.RunAsync();
