@@ -1,20 +1,4 @@
-using TrackingCodeAPI.configs;
-using TrackingCodeApi.handlers;
-using TrackingCodeApi.models;
-using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore; // 👈 necessário para Scalar UI
 
-DotNetEnv.Env.Load();
-
-var builder = WebApplication.CreateBuilder(args);
-
-// ----------- Serviços -----------
-ServicesConfigurator.Configure(builder.Services);
-builder.Services.AddAuthorization();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
 
 // ----------- Middleware global -----------
 // MiddlewareConfigurator.Configure(app);
@@ -57,6 +41,25 @@ var app = builder.Build();
 // }
 
 
+using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore; // Necessário para Scalar UI
+using TrackingCodeAPI.configs;
+using TrackingCodeApi.handlers;
+using TrackingCodeApi.models;
+using TrackingCodeApi.Security; // Garante referência ao middleware customizado
+
+DotNetEnv.Env.Load();
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ----------- Serviços -----------
+ServicesConfigurator.Configure(builder.Services);
+builder.Services.AddAuthorization();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
 // ----------- Health Check -----------
 app.MapGet("/health", () => Results.Ok(new
 {
@@ -68,7 +71,6 @@ app.MapGet("/health", () => Results.Ok(new
 .Produces(StatusCodes.Status200OK)
 .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-
 // ----------- Mapear Handlers -----------
 MotoHandler.MapEndpoints(app);
 TagHandler.MapEndpoints(app);
@@ -79,22 +81,24 @@ app.UseSwagger();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tracking Code API v1"));
+    app.UseSwaggerUI(c => 
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tracking Code API v1"));
 }
 else
 {
-    // 👇 Habilita o Scalar UI em produção
+    // Habilita o Scalar UI em produção
     app.MapScalarApiReference(options =>
     {
         options.Title = "Tracking Code API";
-        options.Theme = ScalarTheme.Default; // ou .DeepSpace, .Purple, etc.
-        options.Servers = new[] { new ScalarServer("https://trackingcodeapi.azurewebsites.net") }; // Ajuste sua URL real
+        options.Theme = ScalarTheme.Default; // Alternativas: DeepSpace, Purple etc.
+        options.Servers = new[] 
+        { 
+            new ScalarServer("https://trackingcodeapi.azurewebsites.net") // Ajuste se necessário
+        };
     });
 }
 
-// ----------- Outros -----------
+// ----------- Middlewares -----------
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.UseMiddleware<TrackingCodeApi.Security.ApiKeyMiddleware>();
-
-await app.RunAsync();
+app.UseMi
