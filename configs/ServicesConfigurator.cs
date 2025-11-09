@@ -50,31 +50,29 @@ namespace TrackingCodeAPI.configs
             {
                 options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-            var sqlConnectionString = "Server=tcp:servertrackingcanada.database.windows.net,1433;Initial Catalog=dbtracking;Persist Security Info=False;User ID=adminsql;Password=SenhaSegura123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
-if (string.IsNullOrWhiteSpace(sqlConnectionString))
-{
-    Console.WriteLine("⚠️ [WARN] Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Tentando via IConfiguration...");
+            // ------------------ Azure SQL Connection String ------------------
+            var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTION_STRING");
 
-    using (var provider = services.BuildServiceProvider())
-    {
-        var configProvider = provider.GetRequiredService<IConfiguration>();
-        sqlConnectionString = configProvider.GetConnectionString("DefaultConnection");
-    }
+            if (string.IsNullOrWhiteSpace(sqlConnectionString))
+            {
+                Console.WriteLine(" Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Tentando via IConfiguration...");
+                sqlConnectionString = configuration.GetConnectionString("DefaultConnection");
 
-    if (string.IsNullOrWhiteSpace(sqlConnectionString))
-    {
-        Console.WriteLine("❌ Nenhuma connection string foi encontrada. Encerrando aplicação.");
-        throw new InvalidOperationException("A variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não foi configurada.");
-    }
-}
-else
-{
-    Console.WriteLine("✅ Connection string recebida do ambiente.");
-}
+                if (string.IsNullOrWhiteSpace(sqlConnectionString))
+                {
+                    Console.WriteLine(" Nenhuma connection string foi encontrada. Encerrando aplicação.");
+                    throw new InvalidOperationException("Opa.");
+                }
+            }
+            else
+            {
+                Console.WriteLine(" Connection string recebida do ambiente.");
+            }
 
-services.AddDbContext<TrackingCodeDb>(opt =>
-    opt.UseSqlServer(sqlConnectionString));
+            services.AddDbContext<TrackingCodeDb>(opt =>
+                opt.UseSqlServer(sqlConnectionString));
+
             // ------------------ Swagger / OpenAPI ------------------
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
