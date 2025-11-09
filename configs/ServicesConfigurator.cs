@@ -50,7 +50,7 @@ namespace TrackingCodeAPI.configs
             {
                 options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-            var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTION_STRING");
+            var sqlConnectionString = "Server=tcp:servertrackingcanada.database.windows.net,1433;Initial Catalog=dbtracking;Persist Security Info=False;User ID=adminsql;Password=SenhaSegura123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
 if (string.IsNullOrWhiteSpace(sqlConnectionString))
 {
