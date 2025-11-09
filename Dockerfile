@@ -3,7 +3,7 @@ WORKDIR /app
 
 EXPOSE 80
 ENV ASPNETCORE_URLS=http://+:80
-ENV AZURE_SQL_CONNECTION_STRING=${AZURE_SQL_CONNECTION_STRING}
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 RUN apt-get update && \
     apt-get install -y libaio1 && \
@@ -25,7 +25,6 @@ RUN dotnet publish "./TrackingCodeAPI.csproj" -c "$BUILD_CONFIGURATION" -o /app/
 
 FROM base AS final
 WORKDIR /app
-
 COPY --from=publish /app/publish .
 
 RUN groupadd -g 1001 appuser && \
