@@ -24,7 +24,7 @@ namespace TrackingCodeAPI.configs
 {
     public static class ServicesConfigurator
     {
-        public static void Configure(IServiceCollection services)
+        public static void Configure(IServiceCollection services, IConfiguration configuration)
         {
             // ------------------ AutoMapper Profiles ------------------
             services.AddAutoMapper(typeof(AuditoriaProfile));
@@ -54,9 +54,15 @@ namespace TrackingCodeAPI.configs
             // ------------------ Database (Azure SQL) ------------------
             var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTION_STRING");
 
-            if (string.IsNullOrEmpty(sqlConnectionString))
+            if (string.IsNullOrWhiteSpace(sqlConnectionString))
             {
-                throw new InvalidOperationException("A variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não foi configurada.");
+                Console.WriteLine("⚠️ [WARN] Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Usando valor do appsettings.json...");
+                sqlConnectionString = configuration.GetConnectionString("DefaultConnection")
+                    ?? throw new InvalidOperationException("Nenhuma connection string configurada.");
+            }
+            else
+            {
+                Console.WriteLine("✅ [INFO] Conexão com Azure SQL obtida via variável de ambiente.");
             }
 
             services.AddDbContext<TrackingCodeDb>(opt =>
