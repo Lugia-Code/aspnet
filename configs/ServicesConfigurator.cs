@@ -51,27 +51,23 @@ namespace TrackingCodeAPI.configs
                 options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            // ------------------ Azure SQL Connection String ------------------
-            var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTION_STRING");
+            // ------------------ Database ------------------
+            // 1️⃣ Tenta pegar do appsettings.json
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            if (string.IsNullOrWhiteSpace(sqlConnectionString))
+            // 2️⃣ Se não encontrar, tenta via variável de ambiente (Azure DevOps)
+            if (string.IsNullOrEmpty(connectionString))
             {
-                Console.WriteLine(" Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Tentando via IConfiguration...");
-                sqlConnectionString = configuration.GetConnectionString("DefaultConnection");
-
-                if (string.IsNullOrWhiteSpace(sqlConnectionString))
-                {
-                    Console.WriteLine(" Nenhuma connection string foi encontrada. Encerrando aplicação.");
-                    throw new InvalidOperationException("Opa.");
-                }
-            }
-            else
-            {
-                Console.WriteLine(" Connection string recebida do ambiente.");
+                connectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING") 
+                                ?? Environment.GetEnvironmentVariable("ORACLE_CONNECTION_STRING");
             }
 
-            services.AddDbContext<TrackingCodeDb>(opt =>
-                opt.UseSqlServer(sqlConnectionString));
+            if (string.IsNullOrEmpty(connectionString))
+                throw new InvalidOperationException("Nenhuma connection string foi encontrada. Verifique suas variáveis de ambiente ou o appsettings.json.");
+
+            // 3️⃣ Configura o banco
+            services.AddDbContext<TrackingCodeDb>(options =>
+                options.UseOracle(connectionString));
 
             // ------------------ Swagger / OpenAPI ------------------
             services.AddEndpointsApiExplorer();
@@ -97,10 +93,11 @@ API para rastreamento e auditoria de motos, localizações e usuários no sistem
 - ✅ Paginação configurável
 - ✅ Validação com FluentValidation
 - ✅ Automapper para mapeamento de DTOs
-- ✅ Integração com Azure SQL Database
+- ✅ Integração com Oracle Database
 "
                 });
 
+                // Define tags para organização no Swagger
                 options.DocumentFilter<SwaggerTagDescriptions>();
             });
         }
