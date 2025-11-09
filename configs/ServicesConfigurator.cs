@@ -50,13 +50,20 @@ namespace TrackingCodeAPI.configs
             {
                 options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
+             
+
             var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTION_STRING");
 
 if (string.IsNullOrWhiteSpace(sqlConnectionString))
 {
-    Console.WriteLine("⚠️ [WARN] Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Tentando via Configuration...");
-    var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
-    sqlConnectionString = configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine("⚠️ [WARN] Variável de ambiente 'AZURE_SQL_CONNECTION_STRING' não encontrada. Tentando via IConfiguration...");
+
+    // Usa o provider temporário apenas para acessar a configuração
+    using (var provider = services.BuildServiceProvider())
+    {
+        var configuration = provider.GetRequiredService<IConfiguration>();
+        sqlConnectionString = configuration.GetConnectionString("DefaultConnection");
+    }
 
     if (string.IsNullOrWhiteSpace(sqlConnectionString))
     {
