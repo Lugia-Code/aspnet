@@ -17,44 +17,44 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // ----------- Middleware global -----------
-MiddlewareConfigurator.Configure(app);
+// MiddlewareConfigurator.Configure(app);
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
 
-    try
-    {
-        var context = services.GetRequiredService<TrackingCodeDb>();
+//     try
+//     {
+//         var context = services.GetRequiredService<TrackingCodeDb>();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.Logger.LogWarning(" Recriando o banco de dados a partir das migrations...");
+//         if (app.Environment.IsDevelopment())
+//         {
+//             app.Logger.LogWarning(" Recriando o banco de dados a partir das migrations...");
 
-            context.Database.EnsureDeleted();  
-            context.Database.Migrate();       
+//             context.Database.EnsureDeleted();  
+//             context.Database.Migrate();       
 
-            app.Logger.LogInformation(" Banco recriado com sucesso a partir das migrations.");
-        }
-        else
-        {
-            if (context.Database.GetPendingMigrations().Any())
-            {
-                context.Database.Migrate();
-                app.Logger.LogInformation(" Banco atualizado com migrations pendentes.");
-            }
-            else
-            {
-                app.Logger.LogInformation(" Nenhuma migration pendente — banco atualizado.");
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, " Erro ao aplicar ou recriar o banco de dados.");
-        throw;
-    }
-}
+//             app.Logger.LogInformation(" Banco recriado com sucesso a partir das migrations.");
+//         }
+//         else
+//         {
+//             if (context.Database.GetPendingMigrations().Any())
+//             {
+//                 context.Database.Migrate();
+//                 app.Logger.LogInformation(" Banco atualizado com migrations pendentes.");
+//             }
+//             else
+//             {
+//                 app.Logger.LogInformation(" Nenhuma migration pendente — banco atualizado.");
+//             }
+//         }
+//     }
+//     catch (Exception ex)
+//     {
+//         app.Logger.LogError(ex, " Erro ao aplicar ou recriar o banco de dados.");
+//         throw;
+//     }
+// }
 
 
 // ----------- Health Check -----------
