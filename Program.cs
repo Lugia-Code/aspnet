@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ----------- Serviços -----------
-ServicesConfigurator.Configure(builder.Services);
+ServicesConfigurator.Configure(builder.Services, builder.Configuration);
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
