@@ -53,7 +53,7 @@ DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // ----------- Serviços -----------
-ServicesConfigurator.Configure(builder.Services);
+ServicesConfigurator.Configure(builder.Services, builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
