@@ -43,8 +43,6 @@ Este sistema foi desenvolvido para gerenciar o rastreamento de **motocicletas co
 * **HATEOAS** para hipermídia (navegabilidade da API).
 * **Paginação** em coleções grandes.
 * **Health Checks** para monitoramento.
-* **Rate Limiting** para proteção contra abuso.
-* **Idempotência** em operações críticas (ex: criação de usuário).
 * **OpenAPI/Swagger** (com Scalar) para documentação interativa.
 * **Versionamento** de API (via URL, `/api/v1/`).
 
@@ -63,7 +61,7 @@ Este sistema foi desenvolvido para gerenciar o rastreamento de **motocicletas co
 1.  **Clone o repositório**
     ```bash
     git clone <https://github.com/Lugia-Code/aspnet.git>
-    cd tracking-code-api
+    cd aspnet
     ```
 
 2.  **Configure a Connection String**
@@ -71,7 +69,7 @@ Este sistema foi desenvolvido para gerenciar o rastreamento de **motocicletas co
     ```json
     {
       "ConnectionStrings": {
-        "FiapOracleDb": "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XEPDB1)));User Id=seu_usuario;Password=sua_senha;"
+        "ORACLE_CONNECTION_STRING": "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XEPDB1)));User Id=seu_usuario;Password=sua_senha;"
       }
     }
     ```
@@ -104,15 +102,15 @@ Este sistema foi desenvolvido para gerenciar o rastreamento de **motocicletas co
 
 | Ação | Método | Endpoint | Observações |
 | :--- | :--- | :--- | :--- |
-| Listar todas | `GET` | `/api/v1/motos?page=1&pageSize=10` | Inclui paginação e links HATEOAS. | ![Retorna todas as motos com paginação](docs/get_motos_com_paginacao.png) |
+| Listar todas | `GET` | `/api/v1/motos?page=1&pageSize=10` | Inclui paginação e links HATEOAS. |(docs/get_motos_com_paginacao.png) |
 | Buscar por chassi | `GET` | `/api/v1/motos/buscar/chassi/9BWZZZ377VT004251` | |
 | Buscar por placa | `GET` | `/api/v1/motos/buscar/placa/ABC1234` | |
 | Listar por setor | `GET` | `/api/v1/motos/setor/1?page=1&pageSize=10` | |
-| **Criar nova moto** | `POST` | `/api/v1/motos` | **(ADICIONE PRINT DA RESPONSE DO SCALAR AQUI)** |
-| **Atualizar moto** | `PUT` | `/api/v1/motos/9BWZZZ377VT004251` | **(ADICIONE PRINT DA RESPONSE DO SCALAR AQUI)** |
+| **Criar nova moto** | `POST` | `/api/v1/motos` | *
+| **Atualizar moto** | `PUT` | `/api/v1/motos/9BWZZZ377VT004251` | 
 | Vincular nova tag | `PUT` | `/api/v1/motos/9BWZZZ377VT004251/tag` | Body: `{"codigoTag": "TAG002"}` |
 | Desvincular tag | `PATCH` | `/api/v1/motos/9BWZZZ377VT004251/desvincular-tag` | |
-| **Deletar moto** | `DELETE` | `/api/v1/motos/9BWZZZ377VT004251` | **(ADICIONE PRINT DA RESPONSE DO SCALAR AQUI)** |
+| **Deletar moto** | `DELETE` | `/api/v1/motos/9BWZZZ377VT004251` | *
 
 #### Exemplo de Resposta de Lista (200 OK)
 ```json
@@ -248,15 +246,6 @@ Acesse o dashboard de Health Checks para uma visão amigável:
 
 -----
 
-## 🔒 Rate Limiting
-
-A API possui **Rate Limiting** configurado para proteção contra abuso.
-
-  * **Limite:** 10 requisições por minuto por IP.
-  * **Resposta quando excedido ($\text{429 Too Many Requests}$):**
-    > Muitas requisições, tente novamente em 60 segundos
-
-Para desabilitar em desenvolvimento, comente a linha no `Program.cs`:
 
 ```csharp
 // app.UseRateLimiter();
@@ -287,7 +276,6 @@ Para desabilitar em desenvolvimento, comente a linha no `Program.cs`:
 | **Status codes apropriados** | ✅ | Uso de $\text{200, 201, 204, 400, 404, 429, 500}$. |
 | **HATEOAS** | ✅ | Uso de *Hypermedia as the Engine of Application State*. |
 | **Paginação** | ✅ | Para coleções grandes de recursos. |
-| **Idempotência** | ✅ | Em operações críticas (ex: $\text{POST}$ de usuário). |
 | **Versionamento** | ✅ | Via URL e headers ($\text{/api/v1/}$). |
 | **Content negotiation** | ✅ | JSON como formato principal. |
 | **Stateless** | ✅ | Sem sessão no servidor. |
