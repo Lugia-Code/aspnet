@@ -11,14 +11,12 @@ using TrackingCodeApi.repos.moto;
 using TrackingCodeApi.repos.setor;
 using TrackingCodeApi.repos.tag;
 
-
 using TrackingCodeApi.models;
 using TrackingCodeApi.dtos.auditoria;
 using TrackingCodeApi.dtos.localizacao;
 using TrackingCodeApi.dtos.moto;
 using TrackingCodeApi.dtos.setor;
 using TrackingCodeApi.dtos.tag;
-
 using TrackingCodeApi.dtos.common;
 using TrackingCodeApi.services;
 
@@ -26,7 +24,7 @@ namespace TrackingCodeAPI.configs
 {
     public static class ServicesConfigurator
     {
-        public static void Configure(IServiceCollection services)
+        public static void Configure(IServiceCollection services, IConfiguration configuration)
         {
             // ------------------ AutoMapper Profiles ------------------
             services.AddAutoMapper(typeof(AuditoriaProfile));
@@ -54,10 +52,10 @@ namespace TrackingCodeAPI.configs
             });
 
             // ------------------ Database ------------------
-            var oracleConnectionString = Environment.GetEnvironmentVariable("ORACLE_CONNECTION_STRING");
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<TrackingCodeDb>(opt =>
-                opt.UseOracle(oracleConnectionString));
+    services.AddDbContext<TrackingCodeDb>(opt =>
+        opt.UseSqlServer(connectionString));
 
             // ------------------ Swagger / OpenAPI ------------------
             services.AddEndpointsApiExplorer();
