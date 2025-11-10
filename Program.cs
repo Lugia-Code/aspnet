@@ -9,57 +9,31 @@ DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --------------------------------------------------------
-// 🔧 CONFIGURAÇÃO PRINCIPAL
-// --------------------------------------------------------
-var configuration = builder.Configuration;
-
-// Adiciona o DbContext com a Connection String do appsettings.json
-builder.Services.AddDbContext<TrackingCodeDb>(options =>
-    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
-);
-
-// Configura os serviços da aplicação
-ServicesConfigurator.Configure(builder.Services, configuration);
-
+// ----------- Serviços -----------
+ServicesConfigurator.Configure(builder.Services, builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ----------- Configuração do banco -----------
+var connectionString = "Server=serverdb2;Database=TrackingCodeDB;User Id=adminsql;Password=Senha123!;TrustServerCertificate=True;";
+builder.Services.AddDbContext<TrackingCodeDb>(options =>
+    options.UseSqlServer(connectionString)
+);
+
+// ----------- App -----------
 var app = builder.Build();
 
-// --------------------------------------------------------
-// 🧱 APLICAÇÃO DE MIGRATIONS AUTOMÁTICA
-// --------------------------------------------------------
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
-    var services = scope.ServiceProvider;
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.MapScalarApiReference();
+}
 
-    try
-    {
-        var context = services.GetRequiredService<TrackingCodeDb>();
+app.UseMiddleware<ApiKeyMiddleware>();
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.Logger.LogWarning("⚙️ Recriando o banco de dados a partir das migrations...");
-            context.Database.EnsureDeleted();
-            context.Database.Migrate();
-            app.Logger.LogInformation("✅ Banco recriado com sucesso.");
-        }
-        else
-        {
-            if (context.Database.GetPendingMigrations().Any())
-            {
-                app.Logger.LogInformation("📦 Aplicando migrations pendentes...");
-                context.Database.Migrate();
-                app.Logger.LogInformation("✅ Banco atualizado.");
-            }
-            else
-            {
-                app.Logger.LogInformation("✅ Nenhuma migration pendente — banco já atualizado.");
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "❌ Erro a
+app.Run();
