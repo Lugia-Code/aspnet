@@ -6,7 +6,7 @@
 
 | Nome | RM |
 | :--- | :--- |
-| [Julia Vasconcelos] | RM558785 |
+| [Julia Vasconcelos Oliveira] | RM558785 |
 | [Nathan Magno Gustavo Consolo] | RM558987 |
 | [Júlio César Nunes Oliveira] | RM557774 |
 
