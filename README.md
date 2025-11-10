@@ -38,6 +38,11 @@ Este sistema foi desenvolvido para gerenciar o rastreamento de **motocicletas co
 * **Camada de Domínio:** Entidades com regras de negócio encapsuladas.
 * **Camada de Infraestrutura:** `DbContext` (EF Core) para persistência em **Oracle**.
 
+###  Segurança
+Exemplo de requisição HTTP
+GET https://localhost:5001/api/v1/motos
+X-API-KEY: mottu
+
 ### Recursos Implementados
 
 * **HATEOAS** para hipermídia (navegabilidade da API).
